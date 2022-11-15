@@ -5,6 +5,7 @@ import random
 import math
 from operator import attrgetter
 from sklearn import preprocessing
+import pandas as pd
 
 class Location:
   """ class that represents a given location determined by
@@ -18,6 +19,7 @@ class Location:
 class Population:
     candidate_list= [] 
     generation_num = 0
+    candidate_selection = []
 
     """"constructor for a population given its length and the list
     of locations which it candidate has to go through"""
@@ -33,7 +35,6 @@ class Population:
       for dna in self.candidate_list:
         dna.get_fitnesse()
       
-      
       return sorted(self.candidate_list,key=attrgetter('fitnesse'), reverse=True)  ######################
         
     def mutate_population(self, mutation_rate):
@@ -43,35 +44,58 @@ class Population:
         mutated_population.append(new_candidate)
       self.candidate_list = mutated_population
 
-
-
-
     def get_max_fitnesse(self):
-
       return self.best_candidates()[0]
 
 
       
-    def selection(self):
+    def selection(self, eliteSize=None):
+      """La seleccion de los padres se hace en funcion del fitness de cada candidato
+      Este algoritmo garantiza que todo candidato pueda elegirse pero tambien hace una seleccion ponderada segun el fitness
+      el fitness dado por la funcion mejoresCandidatos determina el peso de la probabilidad a ser seleccionado basicamente"""
+      ordered_candidates = self.best_candidates()
+
+      #metodo roulette wheel
+      df = pd.DataFrame([x.as_dict() for x in ordered_candidates], columns=["Route","Fitness"])
+      df['cum_sum'] = df.Fitness.cumsum()
+      df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
+      
+      if eliteSize:
+        for i in range(0, eliteSize):
+            self.candidate_selection.append(ordered_candidates[i])
+            
+        for i in range(0, len(ordered_candidates) - eliteSize):
+            pick = 100*random.random()
+            for i in range(0, len(ordered_candidates)):
+                if pick <= df.iat[i,3]:
+                    self.candidate_selection.append(ordered_candidates[i][0])
+                    
+                    break
+      else:
+        for i in range(0, len(ordered_candidates)):
+          pick = 100*random.random()
+          for i in range(0, len(ordered_candidates)):
+            if pick <= df.iat[i,3]:
+              self.candidate_selection.append(ordered_candidates[i][0])
+
+    
+    def reproduction(self):
       """ the candidates' probability to be selected depends on its'
       fitnesse value  """
       new_gen = []
 
-      population_fitness = sum([ dna.fitnesse for dna in self.candidate_list])
-      dna_probabilities = [(dna.fitnesse / population_fitness) for dna in self.candidate_list]
-
-      dad = np.random.choice(self.candidate_list,p=dna_probabilities)
-      mom = np.random.choice(self.candidate_list,p=dna_probabilities)
-
       for i in range(len(self.candidate_list)):
-        new_gen.append(self.reproduction(mom,dad))
+        dad = random.choice(self.candidate_selection)
+        mom = random.choice(self.candidate_selection)
+
+
+        new_gen.append(mom.crossover(dad))
             
       self.candidate_list = new_gen
       self.generation_num +=1
       self.fitnesse = 0.0
-    
-    def reproduction(self, mom, dad):
-      return mom.crossover(dad)
+
+      return 
       
     def plot_route(self):
       
@@ -142,6 +166,9 @@ class Candidate:
   route = []
   fitnesse= 0.0
 
+  def as_dict(self):
+        return {'Route': self.route, 'Fitnesse': self.fitnesse}
+  
 
   def __init__(self, *args):
     if len(args) > 1:
@@ -177,7 +204,7 @@ class Candidate:
         route_dist = math.dist(dna_a.coordinates,dna_b.coordinates) # calculate euclidian distance from pitagoras theorem
         distance += route_dist   # add to the distance value the distance from the dna_a and dna_b picked in this iteration
       
-      self.fitnesse =  1/distance
+      self.fitnesse =  1/(distance)
       return self.fitnesse
     
     else:
@@ -309,14 +336,12 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
 
   for i in range(max_generations):
     print(population.get_max_fitnesse().fitnesse)
-    if(population.get_max_fitnesse().fitnesse) < 0.00053:
-      population.selection()
-      population.mutate_population(mutation_rate)
+    
+    population.selection()
+    population.reproduction()
+    population.mutate_population(mutation_rate)
 
-      generations.append(population.get_max_fitnesse())
-    else:
-      break
-
+    generations.append(population.get_max_fitnesse())
 
   plot_best_routes(generations)
 
@@ -334,4 +359,4 @@ routes = [
 
 list =[]
 
-geneticAlgorithm(routes, 500, 4000, 0.01)
+geneticAlgorithm(routes, 100, 100, 0.01)
