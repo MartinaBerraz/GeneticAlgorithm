@@ -83,13 +83,21 @@ class Population:
       """ the candidates' probability to be selected depends on its'
       fitnesse value  """
       new_gen = []
+      population_fitness = sum([ dna.fitnesse for dna in self.candidate_list])  #it sums up all fitnesses of the candidates of the current generation
+      dna_probabilities = [(dna.fitnesse / population_fitness) for dna in self.candidate_list] #it iterates and creates a list of 
+                                                                                               #all candidates and based on the total sum of
+                                                                                               #the fitnesses of the population it calculates the corresponging
+                                                                                               #fitness of each candidate --> candidateFitness/totalPopulationFitness
 
       for i in range(len(self.candidate_list)):
-        dad = random.choice(self.candidate_selection)
-        mom = random.choice(self.candidate_selection)
-
+        
+        dad = np.random.choice(self.candidate_list,p=dna_probabilities) #returns a random (but weighted choice) candidate from the list
+        mom = np.random.choice(self.candidate_list,p=dna_probabilities) #the parameter p = dna_probabilities makes the random selection weighted
+                                                                        #since candidates with higher fitness will have more probabilities of been chosen
 
         new_gen.append(mom.crossover(dad))
+
+
             
       self.candidate_list = new_gen
       self.generation_num +=1
@@ -163,6 +171,9 @@ class Population:
         
 
 class Candidate:
+  """class for a candidate (solution). For this solution, a candidate represents an specific route, 
+      it goes through all locations only once and it must visit all of them"""
+
   route = []
   fitnesse= 0.0
 
@@ -211,6 +222,11 @@ class Candidate:
       return self.fitnesse
   
   def crossover(self, partner):
+    """Function crossover. It takes the genes from two parents to create a child
+    Basicaly, the function takes a piece of one solution, and another one from the other solution in order to mix both in the child
+    """
+    #we randomly decide what portion of the child will take the adn of the 'mom' 
+    #the other portion left will be filled with the 'dad' adn
     adn1 = int(random.random() * len(self.route))
     adn2 = int(random.random() * len(self.route))
     
@@ -221,7 +237,7 @@ class Candidate:
         mom.append(self.route[i])
         
     dad = [item for item in partner.route if item not in mom]
-    child = Candidate(mom + dad)
+    child = Candidate(mom + dad)#new solution produeced by both parents
 
     return child
     
