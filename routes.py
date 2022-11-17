@@ -27,9 +27,9 @@ class Population:
       self.n = population_length ## number of elements in the population
 
       for i in range(population_length): ## iterate as many times as the population length
-        self.candidate_list.append(Candidate(locations,True)) ## append a new candidate object to the list
+        self.candidate_list.append(Candidate(locations,True)) ## append a new candidate object to the list, True determines that is first generation
 
-    def best_candidates(self):
+    def best_candidates_list(self):
       """function returns a candidate list ordered by its fitness value"""
 
       for dna in self.candidate_list:
@@ -45,7 +45,7 @@ class Population:
       self.candidate_list = mutated_population
 
     def get_max_fitnesse(self):
-      return self.best_candidates()[0]
+      return self.best_candidates_list()[0]
 
 
       
@@ -53,11 +53,11 @@ class Population:
       """La seleccion de los padres se hace en funcion del fitness de cada candidato
       Este algoritmo garantiza que todo candidato pueda elegirse pero tambien hace una seleccion ponderada segun el fitness
       el fitness dado por la funcion mejoresCandidatos determina el peso de la probabilidad a ser seleccionado basicamente"""
-      ordered_candidates = self.best_candidates()
+      ordered_candidates = self.best_candidates_list()
 
       #metodo roulette wheel
-      df = pd.DataFrame([x.as_dict() for x in ordered_candidates], columns=["Route","Fitness"])
-      df['cum_sum'] = df.Fitness.cumsum()
+      df = pd.DataFrame([(x.route,x.fitnesse) for x in ordered_candidates], columns=["Route","Fitness"])
+      df['cum_sum'] = df.Fitness.cumsum() 
       df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
       
       if eliteSize:
@@ -68,15 +68,15 @@ class Population:
             pick = 100*random.random()
             for i in range(0, len(ordered_candidates)):
                 if pick <= df.iat[i,3]:
-                    self.candidate_selection.append(ordered_candidates[i][0])
+                    self.candidate_selection.append(ordered_candidates[i])
                     
                     break
       else:
         for i in range(0, len(ordered_candidates)):
           pick = 100*random.random()
           for i in range(0, len(ordered_candidates)):
-            if pick <= df.iat[i,3]:
-              self.candidate_selection.append(ordered_candidates[i][0])
+            if pick <= df.iat[i,3]: # if random number from 0 to 100 is less than the acumulative sum % it select it
+              self.candidate_selection.append(ordered_candidates[i])
 
     
     def reproduction(self):
@@ -94,6 +94,8 @@ class Population:
         dad = np.random.choice(self.candidate_list,p=dna_probabilities) #returns a random (but weighted choice) candidate from the list
         mom = np.random.choice(self.candidate_list,p=dna_probabilities) #the parameter p = dna_probabilities makes the random selection weighted
                                                                         #since candidates with higher fitness will have more probabilities of been chosen
+
+        #aca deberia estar candidate selection creo --> self.candidate_selection y no self.candidate_list
 
         new_gen.append(mom.crossover(dad))
 
@@ -168,7 +170,8 @@ class Population:
         plt.pause(1)
 
       plt.waitforbuttonpress()
-        
+
+
 
 class Candidate:
   """class for a candidate (solution). For this solution, a candidate represents an specific route, 
@@ -182,7 +185,8 @@ class Candidate:
   
 
   def __init__(self, *args):
-    if len(args) > 1:
+    #if first generation, we create a random route
+    if len(args) > 1: #if first generation we have an extra boolean parameter 'True'
       self.route= []
       num=0
       random_list=[] # create list from which the dna is going to choose which location to visit next 
@@ -204,6 +208,7 @@ class Candidate:
     
 
   def get_fitnesse(self):
+    """returns the fitness of a candidate based on the route total distance"""
     if self.fitnesse == 0.0:
       distance = 0
 
@@ -290,7 +295,10 @@ def plot_route(route):
 
   plt.show()
 
-def plot_best_routes(best_candidates):
+def plot_best_routes(best_route_each_gen):
+    
+
+      ####ploting interactive map
       coordinates_list = []
 
       plt.ion()
@@ -300,8 +308,7 @@ def plot_best_routes(best_candidates):
       img = plt.imread('mapa.png')
 
 
-
-      for dna in best_candidates:
+      for dna in best_route_each_gen:
         routes = []
         coordinates_list = []
         plt.draw()
@@ -343,14 +350,15 @@ def plot_best_routes(best_candidates):
 
 def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   generations = []
-
+  best_fitness_each_generation= []
   for r in routes:
     list.append(Location(r['Coordinates'][0],r["Coordinates"][1],r['Name']))
 
   population = Population(population_size,list)
 
-
+  progress = []
   for i in range(max_generations):
+    progress.append(population.get_max_fitnesse().fitnesse)
     print(population.get_max_fitnesse().fitnesse)
     
     population.selection()
@@ -359,7 +367,15 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
 
     generations.append(population.get_max_fitnesse())
 
+  ###ploting progress curve
+  plt.plot(progress, label='fitness progretion per generation')
+  plt.ylabel('Fitness')
+  plt.xlabel('Generation')
+  plt.legend
+  plt.show()
+  
   plot_best_routes(generations)
+
 
 routes = [
     {"Name": 'Abiyán', "Coordinates": [200,740]}, 
@@ -370,7 +386,17 @@ routes = [
     {"Name": "Zambia", "Coordinates": [460,400]},
     {"Name": "Madagascar", "Coordinates": [650,300]},
     {"Name": "Sudán", "Coordinates": [500,900]},    
-    {"Name": "Hyberabad", "Coordinates": [920,920]}
+    {"Name": "Hyberabad", "Coordinates": [920,920]},
+    ####
+    # {"Name": 'Abiyán', "Coordinates": [240,740]}, 
+    # {"Name": "Niger", "Coordinates": [270,900]},
+    # {"Name": "Namibia", "Coordinates": [200,200]},
+    # {"Name": "Congo", "Coordinates": [450,750]}, 
+    # {"Name": "Ruanda", "Coordinates": [200,600]}, 
+    # {"Name": "Zambia", "Coordinates": [460,800]},
+    # {"Name": "Madagascar", "Coordinates": [650,800]},
+    # {"Name": "Sudán", "Coordinates": [550,955]},    
+    # {"Name": "Hyberabad", "Coordinates": [980,990]},
 ]
 
 list =[]
