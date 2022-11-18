@@ -172,22 +172,14 @@ class Candidate:
 
   def __init__(self, *args):
     #if first generation, we create a random route
+
     if len(args) > 1: #if first generation we have an extra boolean parameter 'True'
       self.route= []
-      num=0
-      random_list=[] # create list from which the dna is going to choose which location to visit next 
-
       list_locations = args[0]
-      
-
-      for num in range(len(list_locations)):
-          random_list.append(num) # create list with numbers from 0 to the length of the list of locations the dna has to visit
-
+    
       
       for i in range(len(list_locations)): 
-        random_num = random.choice(random_list) # pick randomly a number from the list created
-        self.route.append(list_locations[random_num]) # select the next location the dna will visit which is the one whose index equals the random number picked
-        random_list.remove(random_num) # remove the random number picked from the list in order to avoid selecting twice the same location
+        self.route.append(random.choice(list_locations)) # pick randomly a number from the list of locations
 
     else:
       self.route = args[0]
@@ -403,8 +395,8 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
 routes = []
 
 for i in range(30):
-  routes.append({"Coordinates": [random.randint(0,1000), random.randint(0,1000)]})
+  routes.append({"Coordinates": [random.randint(100,900), random.randint(100,900)]})
 
 list =[]
 
-geneticAlgorithm(routes, 100, 300, 0.02)
+geneticAlgorithm(routes, 100, 100, 0.001)
