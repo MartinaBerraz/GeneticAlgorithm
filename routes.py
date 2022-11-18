@@ -19,7 +19,6 @@ class Location:
 class Population:
     candidate_list= [] 
     generation_num = 0
-    candidate_selection = []
 
     """"constructor for a population given its length and the list
     of locations which it candidate has to go through"""
@@ -38,59 +37,61 @@ class Population:
       return sorted(self.candidate_list,key=attrgetter('fitnesse'), reverse=True)  ######################
         
     def mutate_population(self, mutation_rate):
+      """function that iterates for each element of the population and invokes
+      the mutate function """
+
       mutated_population = []
       for dna in self.candidate_list:
-        new_candidate = dna.mutate(mutation_rate)
-        mutated_population.append(new_candidate)
-      self.candidate_list = mutated_population
+      
+        new_candidate = dna.mutate(mutation_rate) # invoke mutate function for that element
+        mutated_population.append(new_candidate) # append to the mutated population the returned element
+
+      self.candidate_list = mutated_population # replace population with the mutated one generated
 
     def get_max_fitnesse(self):
+      """function that returns the element with the max fitnesse of the population"""
       return self.best_candidates_list()[0]
 
     
     def get_min_fitnesse(self):
+      """function that returns the element with the min fitnesse of the population"""
       return self.best_candidates_list()[len(self.candidate_list)-1]
       
-    def selection(self, eliteSize=None):
-      """La seleccion de los padres se hace en funcion del fitness de cada candidato
-      Este algoritmo garantiza que todo candidato pueda elegirse pero tambien hace una seleccion ponderada segun el fitness
-      el fitness dado por la funcion mejoresCandidatos determina el peso de la probabilidad a ser seleccionado basicamente"""
+    def selection(self):
+      """function that returns an element chosen with the accept reject-algorithm"""
     
       while(True):
         partner = {}
 
-        random_index = random.randint(0,len(self.candidate_list)-1)
-        partner = self.candidate_list[random_index]
+        random_index = random.randint(0,len(self.candidate_list)-1) #pick a random index
+        partner = self.candidate_list[random_index] # get the element at that index
 
-        random_fitness = random.uniform(self.get_min_fitnesse().fitnesse,self.get_max_fitnesse().fitnesse) 
+        random_fitness = random.uniform(self.get_min_fitnesse().fitnesse,self.get_max_fitnesse().fitnesse) # pick a random fitnesse between the min and max
 
-        if( random_fitness < partner.fitnesse):
-          return (partner)
+        if( random_fitness < partner.fitnesse): # if the fitnesse of the element selected is greater than the random fitnesse picked
+          return partner #return element
 
           
 
 
     
     def reproduction(self):
-      """ the candidates' probability to be selected depends on its'
-      fitnesse value  """
+      """ function that iterates through the number of elements of the population
+      and picks two parents to generate a child through the crossover function  """
       new_gen = []
 
       for i in range(len(self.candidate_list)):
         
-        dad = self.selection() #returns a random (but weighted choice) candidate from the list
-        mom = self.selection() #the parameter p = dna_probabilities makes the random selection weighted
-                                                                        #since candidates with higher fitness will have more probabilities of been chosen
+        # invokes selection function to choose mother and father
+        dad = self.selection() 
+        mom = self.selection() 
 
-        #aca deberia estar candidate selection creo --> self.candidate_selection y no self.candidate_list
-
-        new_gen.append(mom.crossover(dad))
+        new_gen.append(mom.crossover(dad)) # invoke 
 
 
             
-      self.candidate_list = new_gen
-      self.generation_num +=1
-      self.fitnesse = 0.0
+      self.candidate_list = new_gen # assign the new generation created to the population list 
+      self.generation_num +=1 # increase number of generations
 
       return 
       
@@ -298,6 +299,7 @@ def plot_best_routes(best_route_each_gen):
       for dna in best_route_each_gen:
         routes = []
         coordinates_list = []
+
         plt.draw()
         plt.cla()
 
@@ -317,6 +319,10 @@ def plot_best_routes(best_route_each_gen):
 
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
+
+        ax.text(50,-50,"Generation: "+str(i))
+        ax.text(50,-75,"Max fitness value: "+str(round(dna.fitnesse,7)))
+        i+=1
 
         ax.imshow(img, extent=[0, 1000, 0, 1000], aspect='auto')
         plt.draw()
@@ -344,15 +350,17 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   population = Population(population_size,list)
 
   progress = []
+  
   for i in range(max_generations):
-    progress.append(population.get_max_fitnesse().fitnesse)
-    print(population.get_max_fitnesse().fitnesse)
-    
-    population.selection()
-    population.reproduction()
-    population.mutate_population(mutation_rate)
+      progress.append(population.get_max_fitnesse().fitnesse)
+      print(population.get_max_fitnesse().fitnesse)
+      
+      population.selection()
+      population.reproduction()
+      population.mutate_population(mutation_rate)
 
-    generations.append(population.get_max_fitnesse())
+      generations.append(population.get_max_fitnesse())
+  
 
   ###ploting progress curve
   plt.plot(progress, label='fitness progretion per generation')
@@ -374,18 +382,26 @@ routes = [
     {"Name": "Madagascar", "Coordinates": [650,300]},
     {"Name": "Sudán", "Coordinates": [500,900]},    
     {"Name": "Hyberabad", "Coordinates": [920,920]},
-    ####
-     {"Name": 'Abiyán', "Coordinates": [240,740]}, 
-     {"Name": "Niger", "Coordinates": [270,900]},
-     {"Name": "Namibia", "Coordinates": [200,200]},
-     {"Name": "Congo", "Coordinates": [450,750]}, 
-     {"Name": "Ruanda", "Coordinates": [200,600]}, 
-     {"Name": "Zambia", "Coordinates": [460,800]},
-     {"Name": "Madagascar", "Coordinates": [650,800]},
-     {"Name": "Sudán", "Coordinates": [550,955]},    
-     {"Name": "Hyberabad", "Coordinates": [980,990]},
+     {"Name": 'Senegal', "Coordinates": [118,882]}, 
+     {"Name": "Guinea-Bisau", "Coordinates": [109,823]},
+     {"Name": "Burkina Faso", "Coordinates": [235,850]},
+     {"Name": "Benim", "Coordinates": [260,805]}, 
+     {"Name": "Nigeria", "Coordinates": [315,795]}, 
+     {"Name": "Camerún", "Coordinates": [347,705]},
+     {"Name": "Angola", "Coordinates": [385,370]},
+     {"Name": "Botsuana", "Coordinates": [450,225]},    
+     {"Name": "Sudáfrica", "Coordinates": [445,100]},
+     {"Name": 'Etiopía', "Coordinates": [580,730]}, 
+     {"Name": "Yemen", "Coordinates": [675,910]},
+     {"Name": "Omán", "Coordinates": [715,945]},
+     {"Name": "Somalía", "Coordinates": [638,703]}, 
+     {"Name": "Kenia", "Coordinates": [570,610]}, 
+     {"Name": "Tanzania", "Coordinates": [550,495]},
+     {"Name": "Mozambique", "Coordinates": [575,390]},
+     {"Name": "Zimambue", "Coordinates": [490,280]},    
+     {"Name": "Congo", "Coordinates": [375,595]},
 ]
 
 list =[]
 
-geneticAlgorithm(routes, 500, 1000, 0.01)
+geneticAlgorithm(routes, 200, 200, 0.02)
