@@ -11,10 +11,8 @@ class Location:
   """ class that represents a given location determined by
    its name and (x,y) coordinates
   """
-  def __init__(self, x, y, name): # location constructor
+  def __init__(self, x, y): # location constructor
     self.coordinates = (x,y)
-    self.name = name
-
 
 class Population:
     candidate_list= [] 
@@ -104,7 +102,7 @@ class Population:
 
       fig, ax = plt.subplots(figsize=(22, 12))
       
-      img = plt.imread('mapa.png')
+      img = plt.imread('mapa_catar.png')
 
       for dna in self.candidate_list:
         for location in dna.route:
@@ -265,7 +263,7 @@ def plot_route(route):
   # separate x and y coordinates
 
 
-  img = plt.imread('mapa.png')
+  img = plt.imread('mapa_catar.png')
   fig, ax = plt.subplots(figsize=(22, 12))
 
   sns.scatterplot(x=x,y=y,ax=ax,marker='x',color='red',s=200)
@@ -293,7 +291,8 @@ def plot_best_routes(best_route_each_gen):
 
 
       fig, ax = plt.subplots(figsize=(22, 12))      
-      img = plt.imread('mapa.png')
+      img = plt.imread('mapa_catar.png')
+      i=0
 
 
       for dna in best_route_each_gen:
@@ -345,7 +344,7 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   generations = []
   best_fitness_each_generation= []
   for r in routes:
-    list.append(Location(r['Coordinates'][0],r["Coordinates"][1],r['Name']))
+    list.append(Location(r['Coordinates'][0],r["Coordinates"][1]))
 
   population = Population(population_size,list)
 
@@ -372,36 +371,40 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   plot_best_routes(generations)
 
 
-routes = [
-    {"Name": 'Abiyán', "Coordinates": [200,740]}, 
-    {"Name": "Niger", "Coordinates": [320,950]},
-    {"Name": "Namibia", "Coordinates": [400,200]},
-    {"Name": "Congo", "Coordinates": [450,600]}, 
-    {"Name": "Ruanda", "Coordinates": [500,600]}, 
-    {"Name": "Zambia", "Coordinates": [460,400]},
-    {"Name": "Madagascar", "Coordinates": [650,300]},
-    {"Name": "Sudán", "Coordinates": [500,900]},    
-    {"Name": "Hyberabad", "Coordinates": [920,920]},
-     {"Name": 'Senegal', "Coordinates": [118,882]}, 
-     {"Name": "Guinea-Bisau", "Coordinates": [109,823]},
-     {"Name": "Burkina Faso", "Coordinates": [235,850]},
-     {"Name": "Benim", "Coordinates": [260,805]}, 
-     {"Name": "Nigeria", "Coordinates": [315,795]}, 
-     {"Name": "Camerún", "Coordinates": [347,705]},
-     {"Name": "Angola", "Coordinates": [385,370]},
-     {"Name": "Botsuana", "Coordinates": [450,225]},    
-     {"Name": "Sudáfrica", "Coordinates": [445,100]},
-     {"Name": 'Etiopía', "Coordinates": [580,730]}, 
-     {"Name": "Yemen", "Coordinates": [675,910]},
-     {"Name": "Omán", "Coordinates": [715,945]},
-     {"Name": "Somalía", "Coordinates": [638,703]}, 
-     {"Name": "Kenia", "Coordinates": [570,610]}, 
-     {"Name": "Tanzania", "Coordinates": [550,495]},
-     {"Name": "Mozambique", "Coordinates": [575,390]},
-     {"Name": "Zimambue", "Coordinates": [490,280]},    
-     {"Name": "Congo", "Coordinates": [375,595]},
-]
+# routes = [
+#     {"Name": 'Abiyán', "Coordinates": [200,740]}, 
+#     {"Name": "Niger", "Coordinates": [320,950]},
+#     {"Name": "Namibia", "Coordinates": [400,200]},
+#     {"Name": "Congo", "Coordinates": [450,600]}, 
+#     {"Name": "Ruanda", "Coordinates": [500,600]}, 
+#     {"Name": "Zambia", "Coordinates": [460,400]},
+#     {"Name": "Madagascar", "Coordinates": [650,300]},
+#     {"Name": "Sudán", "Coordinates": [500,900]},    
+#     {"Name": "Hyberabad", "Coordinates": [920,920]},
+#      {"Name": 'Senegal', "Coordinates": [118,882]}, 
+#      {"Name": "Guinea-Bisau", "Coordinates": [109,823]},
+#      {"Name": "Burkina Faso", "Coordinates": [235,850]},
+#      {"Name": "Benim", "Coordinates": [260,805]}, 
+#      {"Name": "Nigeria", "Coordinates": [315,795]}, 
+#      {"Name": "Camerún", "Coordinates": [347,705]},
+#      {"Name": "Angola", "Coordinates": [385,370]},
+#      {"Name": "Botsuana", "Coordinates": [450,225]},    
+#      {"Name": "Sudáfrica", "Coordinates": [445,100]},
+#      {"Name": 'Etiopía', "Coordinates": [580,730]}, 
+#      {"Name": "Yemen", "Coordinates": [675,910]},
+#      {"Name": "Omán", "Coordinates": [715,945]},
+#      {"Name": "Somalía", "Coordinates": [638,703]}, 
+#      {"Name": "Kenia", "Coordinates": [570,610]}, 
+#      {"Name": "Tanzania", "Coordinates": [550,495]},
+#      {"Name": "Mozambique", "Coordinates": [575,390]},
+#      {"Name": "Zimambue", "Coordinates": [490,280]},    
+#      {"Name": "Congo", "Coordinates": [375,595]},
+# ]
+routes = []
+
+for i in range(30):
+  routes.append({"Coordinates": [random.randint(0,1000), random.randint(0,1000)]})
 
 list =[]
 
-geneticAlgorithm(routes, 200, 200, 0.02)
+geneticAlgorithm(routes, 100, 300, 0.02)
