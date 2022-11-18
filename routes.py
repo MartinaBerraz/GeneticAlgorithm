@@ -47,52 +47,40 @@ class Population:
     def get_max_fitnesse(self):
       return self.best_candidates_list()[0]
 
-
+    
+    def get_min_fitnesse(self):
+      return self.best_candidates_list()[len(self.candidate_list)-1]
       
     def selection(self, eliteSize=None):
+      self.candidate_selection = []
       """La seleccion de los padres se hace en funcion del fitness de cada candidato
       Este algoritmo garantiza que todo candidato pueda elegirse pero tambien hace una seleccion ponderada segun el fitness
       el fitness dado por la funcion mejoresCandidatos determina el peso de la probabilidad a ser seleccionado basicamente"""
-      ordered_candidates = self.best_candidates_list()
 
-      #metodo roulette wheel
-      df = pd.DataFrame([(x.route,x.fitnesse) for x in ordered_candidates], columns=["Route","Fitness"])
-      df['cum_sum'] = df.Fitness.cumsum() 
-      df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
-      
-      if eliteSize:
-        for i in range(0, eliteSize):
-            self.candidate_selection.append(ordered_candidates[i])
-            
-        for i in range(0, len(ordered_candidates) - eliteSize):
-            pick = 100*random.random()
-            for i in range(0, len(ordered_candidates)):
-                if pick <= df.iat[i,3]:
-                    self.candidate_selection.append(ordered_candidates[i])
-                    
-                    break
-      else:
-        for i in range(0, len(ordered_candidates)):
-          pick = 100*random.random()
-          for i in range(0, len(ordered_candidates)):
-            if pick <= df.iat[i,3]: # if random number from 0 to 100 is less than the acumulative sum % it select it
-              self.candidate_selection.append(ordered_candidates[i])
+      for i in range(1000):
+        partner = {}
+        random_index = random.randint(0,len(self.candidate_list)-1)
+        
+        partner = self.candidate_list[random_index]
+
+        random_fitness = random.uniform(self.get_min_fitnesse().fitnesse,self.get_max_fitnesse().fitnesse) 
+
+        if( random_fitness < partner.fitnesse):
+          self.candidate_selection.append(partner)
+
+          
+
 
     
     def reproduction(self):
       """ the candidates' probability to be selected depends on its'
       fitnesse value  """
       new_gen = []
-      population_fitness = sum([ dna.fitnesse for dna in self.candidate_list])  #it sums up all fitnesses of the candidates of the current generation
-      dna_probabilities = [(dna.fitnesse / population_fitness) for dna in self.candidate_list] #it iterates and creates a list of 
-                                                                                               #all candidates and based on the total sum of
-                                                                                               #the fitnesses of the population it calculates the corresponging
-                                                                                               #fitness of each candidate --> candidateFitness/totalPopulationFitness
 
       for i in range(len(self.candidate_list)):
         
-        dad = np.random.choice(self.candidate_list,p=dna_probabilities) #returns a random (but weighted choice) candidate from the list
-        mom = np.random.choice(self.candidate_list,p=dna_probabilities) #the parameter p = dna_probabilities makes the random selection weighted
+        dad = np.random.choice(self.candidate_selection) #returns a random (but weighted choice) candidate from the list
+        mom = np.random.choice(self.candidate_selection) #the parameter p = dna_probabilities makes the random selection weighted
                                                                         #since candidates with higher fitness will have more probabilities of been chosen
 
         #aca deberia estar candidate selection creo --> self.candidate_selection y no self.candidate_list
@@ -401,4 +389,4 @@ routes = [
 
 list =[]
 
-geneticAlgorithm(routes, 100, 100, 0.01)
+geneticAlgorithm(routes, 500, 200, 0.01)
