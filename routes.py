@@ -52,21 +52,20 @@ class Population:
       return self.best_candidates_list()[len(self.candidate_list)-1]
       
     def selection(self, eliteSize=None):
-      self.candidate_selection = []
       """La seleccion de los padres se hace en funcion del fitness de cada candidato
       Este algoritmo garantiza que todo candidato pueda elegirse pero tambien hace una seleccion ponderada segun el fitness
       el fitness dado por la funcion mejoresCandidatos determina el peso de la probabilidad a ser seleccionado basicamente"""
-
-      for i in range(1000):
+    
+      while(True):
         partner = {}
+
         random_index = random.randint(0,len(self.candidate_list)-1)
-        
         partner = self.candidate_list[random_index]
 
         random_fitness = random.uniform(self.get_min_fitnesse().fitnesse,self.get_max_fitnesse().fitnesse) 
 
         if( random_fitness < partner.fitnesse):
-          self.candidate_selection.append(partner)
+          return (partner)
 
           
 
@@ -79,8 +78,8 @@ class Population:
 
       for i in range(len(self.candidate_list)):
         
-        dad = np.random.choice(self.candidate_selection) #returns a random (but weighted choice) candidate from the list
-        mom = np.random.choice(self.candidate_selection) #the parameter p = dna_probabilities makes the random selection weighted
+        dad = self.selection() #returns a random (but weighted choice) candidate from the list
+        mom = self.selection() #the parameter p = dna_probabilities makes the random selection weighted
                                                                         #since candidates with higher fitness will have more probabilities of been chosen
 
         #aca deberia estar candidate selection creo --> self.candidate_selection y no self.candidate_list
@@ -376,17 +375,17 @@ routes = [
     {"Name": "Sudán", "Coordinates": [500,900]},    
     {"Name": "Hyberabad", "Coordinates": [920,920]},
     ####
-    # {"Name": 'Abiyán', "Coordinates": [240,740]}, 
-    # {"Name": "Niger", "Coordinates": [270,900]},
-    # {"Name": "Namibia", "Coordinates": [200,200]},
-    # {"Name": "Congo", "Coordinates": [450,750]}, 
-    # {"Name": "Ruanda", "Coordinates": [200,600]}, 
-    # {"Name": "Zambia", "Coordinates": [460,800]},
-    # {"Name": "Madagascar", "Coordinates": [650,800]},
-    # {"Name": "Sudán", "Coordinates": [550,955]},    
-    # {"Name": "Hyberabad", "Coordinates": [980,990]},
+     {"Name": 'Abiyán', "Coordinates": [240,740]}, 
+     {"Name": "Niger", "Coordinates": [270,900]},
+     {"Name": "Namibia", "Coordinates": [200,200]},
+     {"Name": "Congo", "Coordinates": [450,750]}, 
+     {"Name": "Ruanda", "Coordinates": [200,600]}, 
+     {"Name": "Zambia", "Coordinates": [460,800]},
+     {"Name": "Madagascar", "Coordinates": [650,800]},
+     {"Name": "Sudán", "Coordinates": [550,955]},    
+     {"Name": "Hyberabad", "Coordinates": [980,990]},
 ]
 
 list =[]
 
-geneticAlgorithm(routes, 500, 200, 0.01)
+geneticAlgorithm(routes, 500, 1000, 0.01)
