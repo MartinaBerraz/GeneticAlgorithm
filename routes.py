@@ -346,7 +346,7 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   progress = []
   count = 0 
   best_fitnessGlobal = 0
-  limit_without_progress = 5
+  limit_without_progress = 10
   
   for i in range(max_generations):
       progress.append(population.get_max_fitnesse().fitnesse)
@@ -389,7 +389,6 @@ routes = []
 for i in range(30):
   routes.append({"Coordinates": [random.randint(0,1000), random.randint(0,1000)]})
 
-list =[]
 
-bestCandidate = geneticAlgorithm(routes= routes, max_generations= 50, population_size= 100, mutation_rate= 0.001 )
+bestCandidate = geneticAlgorithm(routes= routes, max_generations= 400, population_size= 200, mutation_rate= 0.001 )
 plot_route(bestCandidate.route)
