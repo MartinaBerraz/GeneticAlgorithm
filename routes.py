@@ -387,7 +387,7 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
 routes = []
 
 for i in range(30):
-  routes.append({"Coordinates": [random.randint(0,1000), random.randint(0,1000)]})
+  routes.append({"Coordinates": [random.randint(100,900), random.randint(100,900)]})
 
 
 bestCandidate = geneticAlgorithm(routes= routes, max_generations= 400, population_size= 200, mutation_rate= 0.001 )
