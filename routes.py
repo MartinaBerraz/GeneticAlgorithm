@@ -236,12 +236,6 @@ class Candidate:
     for i in range(len(self.route)): #recorro las casas y si toca intercambiarintercambia
       if(random.random() < mutationRate): #queremos que el mutationRate sea bajo para que sea baja la probabilidad de mutar
           index_change = int(random.random() * len(self.route)) #aleatoriamente agarra la casa por la que va a intercambiarse
-          # ejemplo:
-          #>>> camino = [1,2,3,4,5,6,7,8]
-          #>>> int(random.random() * len(camino)) 
-          # 6
-          #>>> int(random.random() * len(camino))
-          # 4
           location1 = self.route[i] #intercambio las casas
           location2 = self.route[index_change]
           self.route[i] = location2
@@ -321,6 +315,7 @@ def plot_best_routes(best_route_each_gen):
 
         ax.text(50,-50,"Generation: "+str(i))
         ax.text(50,-75,"Max fitness value: "+str(round(dna.fitnesse,7)))
+        ax.text(50,-100,"Distance: "+str(round( 1/ dna.fitnesse ,2)))
         i+=1
 
         ax.imshow(img, extent=[0, 1000, 0, 1000], aspect='auto')
@@ -342,13 +337,16 @@ def plot_best_routes(best_route_each_gen):
 
 def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
   generations = []
-  best_fitness_each_generation= []
+  
   for r in routes:
     list.append(Location(r['Coordinates'][0],r["Coordinates"][1]))
 
   population = Population(population_size,list)
 
   progress = []
+  count = 0 
+  best_fitnessGlobal = 0
+  limit_without_progress = 5
   
   for i in range(max_generations):
       progress.append(population.get_max_fitnesse().fitnesse)
@@ -359,47 +357,33 @@ def geneticAlgorithm(routes, max_generations, population_size, mutation_rate):
       population.mutate_population(mutation_rate)
 
       generations.append(population.get_max_fitnesse())
-  
 
+      """Logic for stop condition - after 2/3 of the max number of generations, 
+      if there are limit_without_progress generations without a progress in comparison with best_fitnessGlobal it stops  """
+      if i > (max_generations * 2)/3:
+        if population.get_max_fitnesse().fitnesse < best_fitnessGlobal: 
+          count+=1
+          if count > limit_without_progress:
+            break
+        else:
+          best_fitnessGlobal = population.get_max_fitnesse().fitnesse
+          bestCandidate = population.get_max_fitnesse()
+           
+
+  
+  progress = progress[:-limit_without_progress ]
   ###ploting progress curve
   plt.plot(progress, label='fitness progretion per generation')
   plt.ylabel('Fitness')
   plt.xlabel('Generation')
   plt.legend
   plt.show()
-  
+
+  plot_route(bestCandidate.route)
   plot_best_routes(generations)
 
+  return bestCandidate
 
-# routes = [
-#     {"Name": 'Abiyán', "Coordinates": [200,740]}, 
-#     {"Name": "Niger", "Coordinates": [320,950]},
-#     {"Name": "Namibia", "Coordinates": [400,200]},
-#     {"Name": "Congo", "Coordinates": [450,600]}, 
-#     {"Name": "Ruanda", "Coordinates": [500,600]}, 
-#     {"Name": "Zambia", "Coordinates": [460,400]},
-#     {"Name": "Madagascar", "Coordinates": [650,300]},
-#     {"Name": "Sudán", "Coordinates": [500,900]},    
-#     {"Name": "Hyberabad", "Coordinates": [920,920]},
-#      {"Name": 'Senegal', "Coordinates": [118,882]}, 
-#      {"Name": "Guinea-Bisau", "Coordinates": [109,823]},
-#      {"Name": "Burkina Faso", "Coordinates": [235,850]},
-#      {"Name": "Benim", "Coordinates": [260,805]}, 
-#      {"Name": "Nigeria", "Coordinates": [315,795]}, 
-#      {"Name": "Camerún", "Coordinates": [347,705]},
-#      {"Name": "Angola", "Coordinates": [385,370]},
-#      {"Name": "Botsuana", "Coordinates": [450,225]},    
-#      {"Name": "Sudáfrica", "Coordinates": [445,100]},
-#      {"Name": 'Etiopía', "Coordinates": [580,730]}, 
-#      {"Name": "Yemen", "Coordinates": [675,910]},
-#      {"Name": "Omán", "Coordinates": [715,945]},
-#      {"Name": "Somalía", "Coordinates": [638,703]}, 
-#      {"Name": "Kenia", "Coordinates": [570,610]}, 
-#      {"Name": "Tanzania", "Coordinates": [550,495]},
-#      {"Name": "Mozambique", "Coordinates": [575,390]},
-#      {"Name": "Zimambue", "Coordinates": [490,280]},    
-#      {"Name": "Congo", "Coordinates": [375,595]},
-# ]
 routes = []
 
 for i in range(30):
@@ -407,4 +391,5 @@ for i in range(30):
 
 list =[]
 
-geneticAlgorithm(routes, 100, 300, 0.02)
+bestCandidate = geneticAlgorithm(routes= routes, max_generations= 50, population_size= 100, mutation_rate= 0.001 )
+plot_route(bestCandidate.route)
